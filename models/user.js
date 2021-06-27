@@ -10,6 +10,10 @@ const userSchema = new Schema({
     type: String,
     default: "",
   },
+  username: {
+    type: String,
+    requied: true,
+  },
 });
 userSchema.plugin(passportLocalMongoose);
 const Users = mongoose.model("Users", userSchema);

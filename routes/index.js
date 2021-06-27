@@ -7,24 +7,16 @@ var router = express.Router();
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
-router
-  .get("/mail", async (req, res, next) => {
-    sendMail().then(
-      (e) => res.send("Mail sent"),
-      (err) => res.send("Error occure")
-    );
-  })
-  .get("/addcronjob", (req, res, next) => {})
-  .get("/nodecron", (req, res, next) => {
-    // console.log(CronJob);
-    schedule.scheduleJob("helloyash", "* * * * *", (d, e) => {
-      console.log(d, e);
-    });
-
-    setTimeout(() => {
-      let current_job = schedule.scheduledJobs["helloyash"];
-      current_job.cancel();
-    }, 180000);
+router.get("/nodecron", (req, res, next) => {
+  // console.log(CronJob);
+  schedule.scheduleJob("helloyash", "* * * * *", (d, e) => {
+    console.log(d, e);
   });
+
+  setTimeout(() => {
+    let current_job = schedule.scheduledJobs["helloyash"];
+    current_job.cancel();
+  }, 180000);
+});
 
 module.exports = router;

@@ -9,10 +9,10 @@ const cors = require("./cors");
 router.use(bodyParser.json());
 router
   .route("/")
-  .options(cors.corsWithOptions, (req, res) => {
+  .options(cors.cors, (req, res) => {
     res.sendStatus(200);
   })
-  .get((req, res, next) => {
+  .get(cors.cors, authenticate.verifyAdmin, (req, res, next) => {
     Users.find({}, { salt: 0, hash: 0 })
       .then(
         (users) => {
@@ -27,27 +27,33 @@ router
 
 router
   .route("/login")
-  .options(cors.corsWithOptions, (req, res) => {
+  .options(cors.cors, (req, res) => {
     res.sendStatus(200);
   })
-  .post((req, res) => {
+  .post(cors.cors, passport.authenticate("local"), (req, res) => {
+    console.log(req.body);
     var token = authenticate.getToken({ _id: req.user._id });
     req.session.user = "authenticated";
     res.statusCode = 200;
+    // res.cookie("token", token);
     res.setHeader("Content-Type", "application/json");
+
     res.json({
       success: true,
       token: token,
       status: "You are successfully logged in!",
+      username: req.user.username,
+      userid: req.user._id,
     });
   });
 
 router
   .route("/signup")
-  .options(cors.corsWithOptions, (req, res) => {
+  .options(cors.cors, (req, res) => {
     res.sendStatus(200);
   })
-  .post((req, res, next) => {
+  .post(cors.cors, (req, res, next) => {
+    console.log(req.body);
     Users.register(
       new Users({ username: req.body.username }),
       req.body.password,
@@ -80,6 +86,21 @@ router
       }
     );
   });
+router
+  .route("/signup/google")
+  .options(cors.cors, (req, res) => {
+    res.sendStatus(200);
+  })
+  .get(
+    cors.cors,
+    passport.authenticate("google_auth", {
+      scope: "https://www.googleapis.com/auth/plus.login",
+    }),
+    (req, res, next) => {
+      console.log(req);
+      res.send("user created");
+    }
+  );
 
 router.get("/logout", (req, res, next) => {
   if (req.session) {
@@ -92,5 +113,14 @@ router.get("/logout", (req, res, next) => {
     next(err);
   }
 });
-
+router
+  .route("/signup1")
+  .options(cors.cors, (req, res) => {
+    res.sendStatus(200);
+  })
+  .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
+    res.setHeader("Content-Type", "application/json");
+    console.log(req.cookies);
+    res.json(req.cookies);
+  });
 module.exports = router;

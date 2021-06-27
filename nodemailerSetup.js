@@ -31,24 +31,14 @@ let transporter = nodemailer.createTransport({
 
 module.exports.sendMail = function sendMail(mail) {
   return new Promise(async (resolve, decline) => {
-    Mails.create(mail)
-      .then((mail_created) => {
-        const mailOption = getMailOptions(mail_created);
-        console.log(mail_created);
-        console.log(mailOption);
-        transporter.sendMail(
-          getMailOptions(mail_created),
-          function (error, info) {
-            if (error) {
-              console.log(error);
-              decline(error);
-            } else {
-              resolve(info);
-            }
-          }
-        );
-      })
-      .catch((e) => decline(e));
+    transporter.sendMail(getMailOptions(mail), function (error, info) {
+      if (error) {
+        console.log(error);
+        decline(error);
+      } else {
+        resolve(info);
+      }
+    });
   });
 };
 
